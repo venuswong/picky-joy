@@ -70,3 +70,4 @@ export default tseslint.config([
 # Updated for Netlify deploy
 # Environment variables added
 # Testing env vars
+# Trigger deploy with correct package.json
