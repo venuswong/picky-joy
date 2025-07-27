@@ -1,44 +1,10 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-
-interface UserStats {
-  user_id: string
-  email: string
-  total_messages: number
-  user_messages: number
-  assistant_messages: number
-  first_message: string
-  last_message: string
-}
+import { useState } from 'react'
 
 export function AdminView() {
-  const [userStats, setUserStats] = useState<UserStats[]>([])
-  const [loading, setLoading] = useState(true)
   const [showAdmin, setShowAdmin] = useState(false)
-
-  useEffect(() => {
-    if (showAdmin) {
-      loadUserStats()
-    }
-  }, [showAdmin])
-
-  const loadUserStats = async () => {
-    try {
-      setLoading(true)
-      
-      // This would require admin privileges or a serverless function
-      // For now, we'll show a message about how to access this data
-      setUserStats([])
-    } catch (error) {
-      console.error('Error loading user stats:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="relative">
-      {/* Toggle Button */}
       <button
         onClick={() => setShowAdmin(!showAdmin)}
         className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all duration-200 shadow-lg"
@@ -49,11 +15,9 @@ export function AdminView() {
         <span>Admin View</span>
       </button>
 
-      {/* Admin Modal */}
       {showAdmin && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
@@ -76,7 +40,6 @@ export function AdminView() {
               </button>
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto p-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold text-blue-800 mb-2">📊 How to View All Users and Messages</h3>
