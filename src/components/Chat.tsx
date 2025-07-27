@@ -32,11 +32,11 @@ export function Chat() {
     })
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('https://vzueavuusnphtuyymckd.supabase.co/functions/v1/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,         },
         body: JSON.stringify({
           message: userMessage,
           userId: (await supabase.auth.getUser()).data.user?.id
