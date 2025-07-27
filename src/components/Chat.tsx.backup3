@@ -90,31 +90,13 @@ export function Chat() {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-slate-500 mt-16">
-            <div className="w-32 h-32 bg-gradient-to-r from-orange-400 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop&crop=face&auto=format" 
-                alt="Happy child ready for food adventures"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h3 className="text-2xl font-bold mb-4 text-slate-700">Welcome to Picky Joy!</h3>
-            <p className="text-slate-500 max-w-md mx-auto leading-relaxed text-lg">
-              Your AI nutrition assistant for picky eaters. Let's make mealtime fun and delicious! 🎉
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
-              <span className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-sm rounded-full font-medium">
-                🍕 Kid-friendly recipes
-              </span>
-              <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 text-sm rounded-full font-medium">
-                🥗 Nutritional tips
-              </span>
-              <span className="px-3 py-1 bg-gradient-to-r from-orange-100 to-pink-100 text-orange-700 text-sm rounded-full font-medium">
-                🎯 Picky eater solutions
-              </span>
-            </div>
+          <div className="text-center text-gray-500 mt-8">
+            <div className="text-4xl mb-4">��️</div>
+            <h3 className="text-lg font-medium mb-2">Welcome to Picky Joy!</h3>
+            <p className="text-sm">Ask me for recipe suggestions, meal planning tips, or nutritional advice for your picky eater.</p>
           </div>
-        )}        
+        )}
+        
         {messages.map((message) => (
           <div
             key={message.id}
