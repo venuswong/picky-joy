@@ -32,44 +32,43 @@ export function Chat() {
     })
 
     try {
-      const response = await fetch('https://vzueavuusnphtuyymckd.supabase.co/functions/v1/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,         },
-        body: JSON.stringify({
-          message: userMessage,
-          userId: (await supabase.auth.getUser()).data.user?.id
-        })
+      // Get the current session to get the JWT token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('No active session')
+      }
+
+      // Mock response for testing - no API calls
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API delay
+      
+      const mockResponse = {
+        message: `Hello! I'm Picky Joy, your AI nutrition assistant. I received your message: "${userMessage}". 
+
+I'm here to help you with recipe suggestions for picky eaters. Here's a simple recipe to get started:
+
+**Recipe Name**: Hidden Veggie Pasta
+**Ingredients**: 
+- 1 cup pasta
+- 1/2 cup pureed carrots
+- 1/4 cup cheese
+- 1 tbsp butter
+
+**Instructions**:
+1. Cook pasta according to package
+2. Mix in pureed carrots
+3. Add cheese and butter
+4. Serve warm
+
+**Tips**: Pureed vegetables are a great way to sneak in nutrition without kids noticing!
+
+Note: This is a demo response. The full AI integration will be available soon!`
+      }
+      
+      addMessage({
+        role: 'assistant',
+        content: mockResponse.message
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to send message')
-      }
-
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error('No response body')
-
-      let assistantMessage = ''
-      
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = new TextDecoder().decode(value)
-        assistantMessage += chunk
-
-        // Update the assistant message in real-time
-        const lastMessage = messages[messages.length - 1]
-        if (lastMessage?.role === 'assistant') {
-          lastMessage.content = assistantMessage
-        } else {
-          addMessage({
-            role: 'assistant',
-            content: assistantMessage
-          })
-        }
-      }
     } catch (error) {
       console.error('Error sending message:', error)
       addMessage({
