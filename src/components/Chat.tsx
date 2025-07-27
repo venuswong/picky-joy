@@ -76,7 +76,7 @@ export function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-white">
       <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
         <h1 className="text-lg font-semibold text-gray-800">Picky Joy</h1>
         <button
@@ -91,7 +91,7 @@ export function Chat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-slate-500 mt-16">
-            <div className="w-32 h-32 bg-gradient-to-r from-orange-400 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <div className="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
               <div className="text-6xl">👶</div>
             </div>
             <h3 className="text-2xl font-bold mb-4 text-slate-700">Welcome to Picky Joy - CHIPP.ai Style!</h3>
