@@ -8,26 +8,6 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 }
 
-const defaultSystemPrompt = `You are Picky Joy, a friendly and knowledgeable AI nutrition assistant specializing in helping parents with picky eaters. You provide personalized recipe suggestions, nutritional advice, and meal planning tips.
-
-Key Guidelines:
-- Always be encouraging and positive
-- Suggest recipes that are kid-friendly and nutritious
-- Consider common picky eater preferences (simple flavors, familiar textures)
-- Provide practical cooking tips
-- Include nutritional benefits when relevant
-- Be creative but realistic about what kids will actually eat
-- Keep responses concise but helpful
-- Ask follow-up questions to better understand the child's preferences
-
-When suggesting recipes, format them like this:
-**Recipe Name**: [Name]
-**Ingredients**: [List]
-**Instructions**: [Steps]
-**Tips**: [Helpful hints for picky eaters]
-
-Remember: You're helping stressed parents, so be supportive and practical!`
-
 exports.handler = async (event, context) => {
   // Handle CORS preflight requests
   if (event.httpMethod === 'OPTIONS') {
@@ -39,9 +19,17 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('Function started')
+    console.log('Environment variables:', {
+      hasSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY
+    })
+
     // Get the authorization header
     const authHeader = event.headers.authorization
     if (!authHeader) {
+      console.log('Missing authorization header')
       return {
         statusCode: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -51,22 +39,37 @@ exports.handler = async (event, context) => {
 
     // Extract the JWT token
     const token = authHeader.replace('Bearer ', '')
+    console.log('Token extracted')
     
-    // Initialize Supabase client with service role key for admin access
+    // Initialize Supabase client
     const supabaseUrl = process.env.VITE_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.log('Missing Supabase environment variables')
+      return {
+        statusCode: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Server configuration error' })
+      }
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    console.log('Supabase client created')
 
     // Verify the JWT token and get user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
+      console.log('Auth error:', authError)
       return {
         statusCode: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'Invalid token' })
       }
     }
+
+    console.log('User authenticated:', user.id)
 
     const { message, selectedProfileId } = JSON.parse(event.body)
 
@@ -78,68 +81,16 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Get user's custom system prompt
-    let systemPrompt = defaultSystemPrompt
-    try {
-      const { data: userSettings } = await supabase
-        .from('user_settings')
-        .select('system_prompt')
-        .eq('user_id', user.id)
-        .single()
+    console.log('Message received:', message)
 
-      if (userSettings?.system_prompt) {
-        systemPrompt = userSettings.system_prompt
+    // Check OpenAI API key
+    if (!process.env.OPENAI_API_KEY) {
+      console.log('Missing OpenAI API key')
+      return {
+        statusCode: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'AI service not configured' })
       }
-    } catch (error) {
-      console.log('Using default system prompt')
-    }
-
-    // Get selected child profile for personalization
-    let childProfile = null
-    if (selectedProfileId) {
-      try {
-        const { data: profile } = await supabase
-          .from('child_profiles')
-          .select('*')
-          .eq('id', selectedProfileId)
-          .eq('user_id', user.id)
-          .single()
-
-        if (profile) {
-          childProfile = profile
-          // Enhance system prompt with child profile information
-          const profileInfo = `
-Child Profile: ${profile.name}${profile.age ? ` (${profile.age} years old)` : ''}
-${profile.preferences.length > 0 ? `Likes: ${profile.preferences.join(', ')}` : ''}
-${profile.allergies.length > 0 ? `Allergies: ${profile.allergies.join(', ')}` : ''}
-
-Please consider this child's preferences and restrictions when suggesting recipes.`
-          
-          systemPrompt = systemPrompt + '\n\n' + profileInfo
-        }
-      } catch (error) {
-        console.log('No child profile found or error loading profile')
-      }
-    }
-
-    // Get recent chat history for context
-    let chatHistory = []
-    try {
-      const { data: recentMessages } = await supabase
-        .from('messages')
-        .select('role, content')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (recentMessages) {
-        chatHistory = recentMessages.reverse().map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }))
-      }
-    } catch (error) {
-      console.log('No chat history found')
     }
 
     // Initialize OpenAI client
@@ -147,40 +98,51 @@ Please consider this child's preferences and restrictions when suggesting recipe
       apiKey: process.env.OPENAI_API_KEY,
     })
 
-    // Build conversation array
+    console.log('OpenAI client created')
+
+    // Simple conversation
     const conversation = [
-      { role: 'system', content: systemPrompt },
-      ...chatHistory,
+      { 
+        role: 'system', 
+        content: 'You are Picky Joy, a friendly AI nutrition assistant for picky eaters. Be helpful and encouraging.' 
+      },
       { role: 'user', content: message }
     ]
 
-    // Save user message to database
-    await supabase
-      .from('messages')
-      .insert({
-        user_id: user.id,
-        role: 'user',
-        content: message
-      })
+    console.log('Calling OpenAI')
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: conversation,
-      max_tokens: 1000,
+      max_tokens: 500,
       temperature: 0.7,
     })
 
     const assistantMessage = completion.choices[0].message.content
+    console.log('OpenAI response received')
 
-    // Save assistant message to database
-    await supabase
-      .from('messages')
-      .insert({
-        user_id: user.id,
-        role: 'assistant',
-        content: assistantMessage
-      })
+    // Save messages to database
+    try {
+      await supabase
+        .from('messages')
+        .insert([
+          {
+            user_id: user.id,
+            role: 'user',
+            content: message
+          },
+          {
+            user_id: user.id,
+            role: 'assistant',
+            content: assistantMessage
+          }
+        ])
+      console.log('Messages saved to database')
+    } catch (dbError) {
+      console.log('Database error:', dbError)
+      // Continue even if database save fails
+    }
 
     return {
       statusCode: 200,
@@ -189,11 +151,15 @@ Please consider this child's preferences and restrictions when suggesting recipe
     }
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Function error:', error)
     return {
       statusCode: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Internal server error', details: error.message })
+      body: JSON.stringify({ 
+        error: 'Internal server error', 
+        details: error.message,
+        stack: error.stack 
+      })
     }
   }
 }
