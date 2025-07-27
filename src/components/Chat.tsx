@@ -83,6 +83,17 @@ Note: This is a demo response. The full AI integration will be available soon!`
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
+      <!-- Header with settings button -->
+      <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
+        <h1 className="text-lg font-semibold text-gray-800">Picky Joy</h1>
+        <button
+          onClick={() => setShowSettings(true)}
+          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          title="AI Settings"
+        >
+          ⚙️
+        </button>
+      </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div
