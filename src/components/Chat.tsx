@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useChatStore } from '../stores/chatStore'
 import { supabase } from '../lib/supabase'
+import { SystemPromptConfig } from './SystemPromptConfig'
 
 export function Chat() {
   const [input, setInput] = useState('')
@@ -17,6 +18,10 @@ export function Chat() {
     scrollToBottom()
   }, [messages])
 
+  const handleSystemPromptSave = (newPrompt: string) => {
+    console.log('System prompt updated:', newPrompt)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
@@ -26,14 +31,12 @@ export function Chat() {
     setIsLoading(true)
     setLoading(true)
 
-    // Add user message to chat
     addMessage({
       role: 'user',
       content: userMessage
     })
 
     try {
-      // Get the current session to get the JWT token
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         throw new Error('No active session')
@@ -74,7 +77,6 @@ export function Chat() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header with settings button */}
       <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
         <h1 className="text-lg font-semibold text-gray-800">Picky Joy</h1>
         <button
@@ -89,7 +91,7 @@ export function Chat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 mt-8">
-            <div className="text-4xl mb-4">🍽️</div>
+            <div className="text-4xl mb-4">��️</div>
             <h3 className="text-lg font-medium mb-2">Welcome to Picky Joy!</h3>
             <p className="text-sm">Ask me for recipe suggestions, meal planning tips, or nutritional advice for your picky eater.</p>
           </div>
@@ -145,33 +147,11 @@ export function Chat() {
         </div>
       </form>
 
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">AI Settings</h2>
-              <button
-                onClick={() => setShowSettings(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-gray-600 mb-4">
-              System prompt configuration is being loaded...
-            </p>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowSettings(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SystemPromptConfig
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onSave={handleSystemPromptSave}
+      />
     </div>
   )
 }
