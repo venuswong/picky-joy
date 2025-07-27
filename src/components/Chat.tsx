@@ -168,3 +168,4 @@ export function Chat() {
     </div>
   )
 }
+// CHIPP.ai style redesign
