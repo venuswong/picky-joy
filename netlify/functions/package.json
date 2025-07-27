@@ -1,0 +1,10 @@
+{
+  "name": "picky-joy-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Picky Joy",
+  "main": "index.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.52.1",
+    "openai": "^5.10.2"
+  }
+}
