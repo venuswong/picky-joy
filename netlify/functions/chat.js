@@ -7,7 +7,6 @@ const corsHeaders = {
 
 exports.handler = async (event, context) => {
   console.log('Function started')
-  console.log('Event:', JSON.stringify(event, null, 2))
   
   // Handle CORS preflight requests
   if (event.httpMethod === 'OPTIONS') {
@@ -19,26 +18,24 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Check environment variables
-    console.log('Environment check:', {
-      hasSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
-      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      hasOpenAIKey: !!process.env.OPENAI_API_KEY
-    })
+    // List ALL environment variables (be careful with sensitive data)
+    const allEnvVars = Object.keys(process.env).filter(key => 
+      key.includes('SUPABASE') || key.includes('OPENAI') || key.includes('VITE')
+    )
+    
+    const envStatus = {
+      'VITE_SUPABASE_URL': !!process.env.VITE_SUPABASE_URL,
+      'VITE_SUPABASE_ANON_KEY': !!process.env.VITE_SUPABASE_ANON_KEY,
+      'SUPABASE_SERVICE_ROLE_KEY': !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      'OPENAI_API_KEY': !!process.env.OPENAI_API_KEY,
+      'All Supabase/OpenAI vars found': allEnvVars
+    }
 
-    // Parse the request body
-    const body = JSON.parse(event.body || '{}')
-    console.log('Request body:', body)
-
-    // For now, just return a test response
     return {
       statusCode: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        message: 'Test response from Netlify function. Environment variables: ' + 
-                 (process.env.VITE_SUPABASE_URL ? 'Supabase URL OK' : 'Missing Supabase URL') + ', ' +
-                 (process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Service Key OK' : 'Missing Service Key') + ', ' +
-                 (process.env.OPENAI_API_KEY ? 'OpenAI Key OK' : 'Missing OpenAI Key')
+        message: 'Environment check: ' + JSON.stringify(envStatus, null, 2)
       })
     }
 
@@ -49,8 +46,7 @@ exports.handler = async (event, context) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         error: 'Internal server error', 
-        details: error.message,
-        stack: error.stack 
+        details: error.message
       })
     }
   }
