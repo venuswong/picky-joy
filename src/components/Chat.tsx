@@ -98,14 +98,14 @@ export function Chat() {
             <p className="text-slate-500 max-w-md mx-auto leading-relaxed text-lg">
               Your AI nutrition assistant for picky eaters. Let's make mealtime fun and delicious! 🎉
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
-              <span className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-sm rounded-full font-medium">
+            <div className="mt-6 flex flex-wrap justify-center gap-3 max-w-lg mx-auto">
+              <span className="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border border-gray-200 text-sm rounded-lg font-medium">
                 🍕 Kid-friendly recipes
               </span>
-              <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 text-sm rounded-full font-medium">
+              <span className="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border border-gray-200 text-sm rounded-lg font-medium">
                 🥗 Nutritional tips
               </span>
-              <span className="px-3 py-1 bg-gradient-to-r from-orange-100 to-pink-100 text-orange-700 text-sm rounded-full font-medium">
+              <span className="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 border border-gray-200 text-sm rounded-lg font-medium">
                 🎯 Picky eater solutions
               </span>
             </div>
@@ -130,9 +130,9 @@ export function Chat() {
           <div className="flex justify-start">
             <div className="bg-white text-gray-800 border border-gray-200 px-4 py-2 rounded-lg">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-lg animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-lg animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-lg animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
           </div>
