@@ -42,7 +42,7 @@ export function SystemPromptConfig({ isOpen, onClose, onSave }: SystemPromptConf
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('user_settings')
         .select('system_prompt')
         .eq('user_id', session.user.id)

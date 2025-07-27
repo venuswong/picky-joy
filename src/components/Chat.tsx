@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 export function Chat() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { messages, addMessage, setLoading } = useChatStore()
 
@@ -38,35 +39,25 @@ export function Chat() {
         throw new Error('No active session')
       }
 
-      // Mock response for testing - no API calls
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API delay
-      
-      const mockResponse = {
-        message: `Hello! I'm Picky Joy, your AI nutrition assistant. I received your message: "${userMessage}". 
+      const response = await fetch('/.netlify/functions/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          message: userMessage
+        })
+      })
 
-I'm here to help you with recipe suggestions for picky eaters. Here's a simple recipe to get started:
-
-**Recipe Name**: Hidden Veggie Pasta
-**Ingredients**: 
-- 1 cup pasta
-- 1/2 cup pureed carrots
-- 1/4 cup cheese
-- 1 tbsp butter
-
-**Instructions**:
-1. Cook pasta according to package
-2. Mix in pureed carrots
-3. Add cheese and butter
-4. Serve warm
-
-**Tips**: Pureed vegetables are a great way to sneak in nutrition without kids noticing!
-
-Note: This is a demo response. The full AI integration will be available soon!`
+      if (!response.ok) {
+        throw new Error('Failed to send message')
       }
-      
+
+      const data = await response.json()
       addMessage({
         role: 'assistant',
-        content: mockResponse.message
+        content: data.message
       })
 
     } catch (error) {
@@ -83,7 +74,7 @@ Note: This is a demo response. The full AI integration will be available soon!`
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <!-- Header with settings button -->
+      {/* Header with settings button */}
       <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
         <h1 className="text-lg font-semibold text-gray-800">Picky Joy</h1>
         <button
@@ -94,7 +85,16 @@ Note: This is a demo response. The full AI integration will be available soon!`
           ⚙️
         </button>
       </div>
+
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-500 mt-8">
+            <div className="text-4xl mb-4">🍽️</div>
+            <h3 className="text-lg font-medium mb-2">Welcome to Picky Joy!</h3>
+            <p className="text-sm">Ask me for recipe suggestions, meal planning tips, or nutritional advice for your picky eater.</p>
+          </div>
+        )}
+        
         {messages.map((message) => (
           <div
             key={message.id}
@@ -144,6 +144,34 @@ Note: This is a demo response. The full AI integration will be available soon!`
           </button>
         </div>
       </form>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">AI Settings</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-gray-600 mb-4">
+              System prompt configuration is being loaded...
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
